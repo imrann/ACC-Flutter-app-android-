@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:aayush_carrom_club/Screens/AddNotice.dart';
 import 'package:aayush_carrom_club/Screens/AppBarCommon.dart';
@@ -33,6 +34,14 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  getToken() {
+    _firebaseMessaging.getToken().then((token) {
+      print("Device Token: $token");
+    });
+  }
+
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   ProgressDialog progressDialog;
 
@@ -68,6 +77,19 @@ class _HomeState extends State<Home> {
       });
     });
     super.initState();
+    getToken();
+    getMessage();
+  }
+
+  void getMessage() {
+    _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+      print('on message $message');
+    }, onResume: (Map<String, dynamic> message) async {
+      print('on resume $message');
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print('on launch $message');
+    });
   }
 
   void updateTabSelection(int index) {
@@ -248,7 +270,32 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                     ))
-                : SizedBox(height: 0)
+                : Positioned(
+                    top: (MediaQuery.of(context).size.width * 50) / 100,
+                    left: (MediaQuery.of(context).size.width * 65) / 100,
+                    right: 0,
+                    child: Center(
+                      child: InkWell(
+                        splashColor: Colors.redAccent[200],
+                        child: Container(
+                          child: Padding(
+                            padding: const EdgeInsets.all(3),
+                            child: Text("Notice Board",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ),
+                    ))
+            // Container(
+            //     child: Padding(
+            //       padding: const EdgeInsets.all(3),
+            //       child: Text("Notice Board",
+            //           style: TextStyle(fontSize: 50, color: Colors.green)),
+            //     ),
+            //   ),
           ],
         ),
       ),
