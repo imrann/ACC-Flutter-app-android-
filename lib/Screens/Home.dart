@@ -12,10 +12,13 @@ import 'package:aayush_carrom_club/Screens/SlotBooking.dart';
 import 'package:aayush_carrom_club/Screens/StateManager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
 import 'DrawerNav.dart';
+
+final DateFormat format = new DateFormat("EEE, M/d/y").add_jms();
 
 String role = 'User';
 FloatingActionButtonLocation fab = FloatingActionButtonLocation.centerFloat;
@@ -243,7 +246,7 @@ class _HomeState extends State<Home> {
             role == 'Admin'
                 ? Positioned(
                     top: (MediaQuery.of(context).size.width * 50) / 100,
-                    left: (MediaQuery.of(context).size.width * 85) / 100,
+                    left: (MediaQuery.of(context).size.width * 53) / 100,
                     right: 0,
                     child: Center(
                       child: InkWell(
@@ -261,10 +264,19 @@ class _HomeState extends State<Home> {
                         child: Container(
                           child: Padding(
                             padding: const EdgeInsets.all(3),
-                            child: Icon(
-                              Icons.add,
-                              size: 50,
-                              color: Colors.black,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.add,
+                                  size: 50,
+                                  color: Colors.black,
+                                ),
+                                Text("Notice Board",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold))
+                              ],
                             ),
                           ),
                         ),
@@ -449,7 +461,11 @@ class _HomeState extends State<Home> {
                               data[index]['description7'],
                               data[index]['title8'],
                               data[index]['description8'],
-                              data[index]['createdDate'],
+                              data[index]['createdDate']
+                                  .toDate()
+                                  .toString()
+                                  .substring(0, 16),
+                              //
                               context);
                         },
                         child: Card(
@@ -505,9 +521,11 @@ class _HomeState extends State<Home> {
                                           Text(
                                             "Posted On: " +
                                                 data[index]['createdDate']
-                                                    .toString(),
+                                                    .toDate()
+                                                    .toString()
+                                                    .substring(0, 16),
                                             style: TextStyle(
-                                                color: Colors.white,
+                                                color: Colors.black,
                                                 fontWeight: FontWeight.normal,
                                                 fontSize: 10),
                                           )

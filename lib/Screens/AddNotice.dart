@@ -255,7 +255,7 @@ class _AddNoticeState extends State<AddNotice> {
                 databaseReference.collection("NoticeBoard").add({
                   'title': titleController.text,
                   'description': descriptionController.text,
-                  'createdDate': DateTime.now().toString().substring(0, 10),
+                  'createdDate': DateTime.now(),
                   'title1': title1Controller.text,
                   'description1': description1Controller.text,
                   'title2': title2Controller.text,
