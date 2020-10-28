@@ -213,6 +213,7 @@ class _LoginState extends State<Login> {
                   ],
                   autofocus: false,
                   readOnly: false,
+                  // ignore: deprecated_member_use
                   autovalidate: _autoValidate,
                   validator: _userNameValidator,
                   controller: _userNameController,
@@ -335,6 +336,7 @@ class _LoginState extends State<Login> {
       obsecureText: false,
       animationType: AnimationType.fade,
       inputFormatters: <TextInputFormatter>[
+        // ignore: deprecated_member_use
         WhitelistingTextInputFormatter.digitsOnly
       ],
       pinTheme: PinTheme(

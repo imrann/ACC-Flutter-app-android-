@@ -224,6 +224,7 @@ class _ShopState extends State<Shop> {
                 Icons.home,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title: Text(
                 'Home',
                 style: TextStyle(color: Colors.white),
@@ -233,6 +234,7 @@ class _ShopState extends State<Shop> {
                 Icons.confirmation_number,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title:
                   Text('My Bookings', style: TextStyle(color: Colors.white))),
           BottomNavigationBarItem(
@@ -240,6 +242,7 @@ class _ShopState extends State<Shop> {
                 Icons.compare_arrows,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title:
                   Text('Transactions', style: TextStyle(color: Colors.white))),
         ],
@@ -439,11 +442,15 @@ class _ShopState extends State<Shop> {
                                 children: [
                                   Text(data[index]['transactionStatus'],
                                       style: TextStyle(
-                                          color: data[index]
+                                          color: (data[index]
                                                       ['transactionStatus'] ==
-                                                  'success'
+                                                  'success')
                                               ? Colors.green
-                                              : Colors.red,
+                                              : (data[index][
+                                                          'transactionStatus'] ==
+                                                      'payment pending')
+                                                  ? Colors.yellow[700]
+                                                  : Colors.red,
                                           fontWeight: FontWeight.normal,
                                           fontSize: 15)),
                                 ],

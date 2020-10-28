@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:aayush_carrom_club/SharedPref/UserDetailsSP.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:aayush_carrom_club/Screens/AddNotice.dart';
@@ -12,11 +13,17 @@ import 'package:aayush_carrom_club/Screens/SlotBooking.dart';
 import 'package:aayush_carrom_club/Screens/StateManager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
 import 'DrawerNav.dart';
+
+bool selected;
+List<String> selectedList;
 
 final DateFormat format = new DateFormat("EEE, M/d/y").add_jms();
 
@@ -37,13 +44,14 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
-  getToken() {
-    _firebaseMessaging.getToken().then((token) {
-      print("Device Token: $token");
-    });
-  }
+  // getToken() {
+  //   _firebaseMessaging.getToken().then((token) {
+  //     print("Device Token: $token");
+  //   });
+  // }
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   ProgressDialog progressDialog;
@@ -80,13 +88,63 @@ class _HomeState extends State<Home> {
       });
     });
     super.initState();
-    getToken();
+
+    var initializationSettingsAndroid =
+        new AndroidInitializationSettings('app_icon');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+
+    selectedList = [];
+    selected = false;
+    UserDetailsSP().getDeviceToken().then((sharedPtoken) {
+      print("sharedPtoken: " + sharedPtoken);
+      if (sharedPtoken == 'empty') {
+        _firebaseMessaging.getToken().then((tokenValue) {
+          print("tokenValue :" + tokenValue);
+          UserDetailsSP().setDeviceToken(tokenValue);
+          final databaseReference = Firestore.instance;
+
+          databaseReference
+              .collection("DecviceToken")
+              .add({"deviceToken": tokenValue}).then((value) {});
+        });
+      }
+    });
+
     getMessage();
   }
 
+  Future _showNotificationWithDefaultSound(String title, String body) async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        priority: Priority.High, importance: Importance.Max);
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: 'Default_Sound',
+    );
+  }
+
+  Future onSelectNotification(String payload) async {
+    return null;
+  }
+
+// message['notification:']['title'], message['data:']['message:']
   void getMessage() {
     _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) async {
+      // _showNotificationWithDefaultSound(
+      //     message['notification']['title'].toString(),
+      //     message['notification']['body'].toString());
       print('on message $message');
     }, onResume: (Map<String, dynamic> message) async {
       print('on resume $message');
@@ -246,36 +304,69 @@ class _HomeState extends State<Home> {
             role == 'Admin'
                 ? Positioned(
                     top: (MediaQuery.of(context).size.width * 50) / 100,
-                    left: (MediaQuery.of(context).size.width * 53) / 100,
+                    left: selected == false
+                        ? (MediaQuery.of(context).size.width * 53) / 100
+                        : (MediaQuery.of(context).size.width * 67) / 100,
                     right: 0,
                     child: Center(
                       child: InkWell(
                         splashColor: Colors.redAccent[200],
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AddNotice(
-                                        user: widget.user,
-                                        phone: widget.phone,
-                                        userID: widget.userID,
-                                      )));
+                          progressDialog.show().then((value) {
+                            if (value) {
+                              if (selected == true) {
+                                for (var item in selectedList) {
+                                  Firestore.instance
+                                      .collection("NoticeBoard")
+                                      .document(item)
+                                      .delete();
+                                }
+                                progressDialog.hide();
+                                setState(() {
+                                  selected = false;
+                                });
+                                Fluttertoast.showToast(msg: "Deleted!");
+                              } else {
+                                progressDialog.hide();
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => AddNotice(
+                                              user: widget.user,
+                                              phone: widget.phone,
+                                              userID: widget.userID,
+                                            )));
+                              }
+                            }
+                          });
                         },
                         child: Container(
                           child: Padding(
                             padding: const EdgeInsets.all(3),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.add,
-                                  size: 50,
-                                  color: Colors.black,
-                                ),
-                                Text("Notice Board",
-                                    style: TextStyle(
-                                        fontSize: 20,
+                                selected == false
+                                    ? Icon(
+                                        Icons.add,
+                                        size: 30,
                                         color: Colors.black,
-                                        fontWeight: FontWeight.bold))
+                                      )
+                                    : Icon(
+                                        Icons.delete,
+                                        size: 30,
+                                        color: Colors.black,
+                                      ),
+                                selected == false
+                                    ? Text("Notice Board",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold))
+                                    : Text("Delete",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold))
                               ],
                             ),
                           ),
@@ -367,12 +458,14 @@ class _HomeState extends State<Home> {
                 Icons.home,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title: Text('Home', style: TextStyle(color: Colors.white))),
           BottomNavigationBarItem(
               icon: Icon(
                 Icons.confirmation_number,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title:
                   Text('My Bookings', style: TextStyle(color: Colors.white))),
           BottomNavigationBarItem(
@@ -380,6 +473,7 @@ class _HomeState extends State<Home> {
                 Icons.compare_arrows,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title:
                   Text('Transactions', style: TextStyle(color: Colors.white))),
         ],
@@ -441,35 +535,101 @@ class _HomeState extends State<Home> {
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       return InkWell(
+                        splashColor: Colors.white,
+                        onLongPress: () {
+                          if (role == 'Admin') {
+                            print("before : " + selectedList.length.toString());
+                            setState(() {
+                              if (selectedList.length == 0 && selected) {
+                                setState(() {
+                                  selected = false;
+                                });
+                              } else {
+                                selected = true;
+                                if (selectedList.contains(
+                                    data[index]['NoticeDocId'].toString())) {
+                                  selectedList.remove(
+                                      data[index]['NoticeDocId'].toString());
+                                  HapticFeedback.selectionClick();
+                                  selectedList.length == 0
+                                      ? selected = false
+                                      // ignore: unnecessary_statements
+                                      : null;
+                                } else {
+                                  selectedList.add(
+                                      data[index]['NoticeDocId'].toString());
+                                  HapticFeedback.selectionClick();
+                                }
+                              }
+                              print(
+                                  "after : " + selectedList.length.toString());
+                            });
+                          } else {
+                            return null;
+                          }
+                        },
                         onTap: () {
-                          noticeSlider(
-                              data[index]['title'],
-                              data[index]['description'],
-                              data[index]['title1'],
-                              data[index]['description1'],
-                              data[index]['title2'],
-                              data[index]['description2'],
-                              data[index]['title3'],
-                              data[index]['description3'],
-                              data[index]['title4'],
-                              data[index]['description4'],
-                              data[index]['title5'],
-                              data[index]['description5'],
-                              data[index]['title6'],
-                              data[index]['description6'],
-                              data[index]['title7'],
-                              data[index]['description7'],
-                              data[index]['title8'],
-                              data[index]['description8'],
-                              data[index]['createdDate']
-                                  .toDate()
-                                  .toString()
-                                  .substring(0, 16),
-                              //
-                              context);
+                          print("before : " + selectedList.length.toString());
+                          selected == true
+                              ? setState(() {
+                                  if (selectedList.length == 0 && selected) {
+                                    setState(() {
+                                      selected = false;
+                                    });
+                                  } else {
+                                    if (selectedList.contains(data[index]
+                                            ['NoticeDocId']
+                                        .toString())) {
+                                      selectedList.remove(data[index]
+                                              ['NoticeDocId']
+                                          .toString());
+                                      HapticFeedback.selectionClick();
+                                      selectedList.length == 0
+                                          ? selected = false
+                                          // ignore: unnecessary_statements
+                                          : null;
+                                    } else {
+                                      selectedList.add(data[index]
+                                              ['NoticeDocId']
+                                          .toString());
+                                      HapticFeedback.selectionClick();
+                                    }
+                                  }
+                                  print("after : " +
+                                      selectedList.length.toString());
+                                })
+                              : noticeSlider(
+                                  data[index]['title'],
+                                  data[index]['description'],
+                                  data[index]['title1'],
+                                  data[index]['description1'],
+                                  data[index]['title2'],
+                                  data[index]['description2'],
+                                  data[index]['title3'],
+                                  data[index]['description3'],
+                                  data[index]['title4'],
+                                  data[index]['description4'],
+                                  data[index]['title5'],
+                                  data[index]['description5'],
+                                  data[index]['title6'],
+                                  data[index]['description6'],
+                                  data[index]['title7'],
+                                  data[index]['description7'],
+                                  data[index]['title8'],
+                                  data[index]['description8'],
+                                  data[index]['createdDate']
+                                      .toDate()
+                                      .toString()
+                                      .substring(0, 16),
+                                  //
+                                  context);
                         },
                         child: Card(
-                          color: Colors.redAccent,
+                          color: (selected == true &&
+                                  selectedList.contains(
+                                      data[index]['NoticeDocId'].toString()))
+                              ? Colors.redAccent[700]
+                              : Colors.redAccent[200],
                           child: Row(
                             children: [
                               Column(children: <Widget>[

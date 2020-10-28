@@ -37,6 +37,47 @@ class DrawerTiles extends StatelessWidget {
             Navigator.of(context).pop();
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => WebViewContainer()));
+          } else if (title == "Payent Details") {
+            Navigator.of(context).pop();
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Payment Details'),
+                    content: SizedBox(
+                      height: 100,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [SelectableText("Phone No : 8850558137")],
+                          ),
+                          SizedBox(height: 30),
+                          Row(
+                            children: [
+                              SelectableText("UPI ID : 8850558137@ybl")
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      // FlatButton(
+                      //   child: Text('NO'),
+                      //   onPressed: () {
+                      //     Navigator.of(context).pop(false);
+                      //   },
+                      // ),
+                      FlatButton(
+                        child: Text('OK'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                });
+            // Navigator.push(context,
+            //     MaterialPageRoute(builder: (context) => WebViewContainer()));
           }
         });
   }

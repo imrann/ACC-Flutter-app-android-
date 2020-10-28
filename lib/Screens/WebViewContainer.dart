@@ -43,23 +43,32 @@ class _WebViewContainerState extends State<WebViewContainer> {
       ),
       body: Stack(
         children: <Widget>[
-          WebView(
-            // onPageStarted: showLoader(),
-            onPageFinished: (_) {
-              setState(() {
-                isLoading = false;
-              });
-            },
-            onWebViewCreated: (WebViewController webViewController) {
-              _controller.complete(webViewController);
-            },
-            initialUrl:
-                "https://www.youtube.com/playlist?list=PLzph2VNhVq_uKSo7zERVRewVHWjKo_jWB",
-            javascriptMode: JavascriptMode.unrestricted,
-            // onWebViewCreated: (WebViewController c) {
-            //   _controller = c;
-            // },
-          ),
+          Positioned(
+              top: 30,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Center(
+                child: Container(
+                  child: WebView(
+                    // onPageStarted: showLoader(),
+                    onPageFinished: (_) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                    },
+                    onWebViewCreated: (WebViewController webViewController) {
+                      _controller.complete(webViewController);
+                    },
+                    initialUrl:
+                        "https://www.youtube.com/channel/UCUyPhl0w0UUn_U8ZalKsGVw/featured",
+                    javascriptMode: JavascriptMode.unrestricted,
+                    // onWebViewCreated: (WebViewController c) {
+                    //   _controller = c;
+                    // },
+                  ),
+                ),
+              )),
           isLoading ? Center(child: CircularProgressIndicator()) : Container(),
         ],
       ),

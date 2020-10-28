@@ -63,30 +63,32 @@ class _SlotBookingState extends State<SlotBooking> {
   Future<UpiResponse> _transaction;
   UpiIndia _upiIndia = UpiIndia();
   List<UpiApp> apps;
-
   @override
   void initState() {
     fab = FloatingActionButtonLocation.centerFloat;
     enableButton = false;
     docID = "";
     selectedSlotsCount = 0;
-    _upiIndia.getAllUpiApps().then((value) {
+    _upiIndia.getAllUpiApps(mandatoryTransactionId: false).then((value) {
       setState(() {
         apps = value;
       });
+    }).catchError((e) {
+      apps = [];
     });
     super.initState();
   }
 
-  Future<UpiResponse> initiateTransaction(String app) async {
+//
+  Future<UpiResponse> initiateTransaction(UpiApp app) async {
     return _upiIndia.startTransaction(
       app: app,
       receiverUpiId: '8850558137@ybl',
       receiverName: 'Ajay Thori',
       transactionRefId: 'Carrom Slot Booking',
       transactionNote:
-          'Pay Rs.' + '${selectedSlotsCount * 50.00}' + '/-  to ACC',
-      amount: selectedSlotsCount * 50.00.toDouble(),
+          'Pay Rs.' + '${selectedSlotsCount * 1.00}' + '/-  to ACC',
+      amount: selectedSlotsCount * 1.00.toDouble(),
     );
   }
 
@@ -101,7 +103,7 @@ class _SlotBookingState extends State<SlotBooking> {
           children: apps.map<Widget>((UpiApp app) {
             return GestureDetector(
               onTap: () {
-                _transaction = initiateTransaction(app.app);
+                _transaction = initiateTransaction(app);
                 setState(() {});
               },
               child: Container(
@@ -135,8 +137,8 @@ class _SlotBookingState extends State<SlotBooking> {
     Widget okButton = FlatButton(
       child: Text("OK"),
       onPressed: () {
-        Navigator.of(context).pop();
         _cancleTransaction(errorMsg, docID);
+        Navigator.of(context).pop();
       },
     );
 
@@ -200,158 +202,170 @@ class _SlotBookingState extends State<SlotBooking> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: Column(
-                children: [
-                  Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 10,
-                              width: 10,
-                              color: Colors.red,
-                            ),
-                            Text("Booked"),
-                            SizedBox(width: 30),
-                            Container(
-                              height: 10,
-                              width: 10,
-                              color: Colors.green,
-                            ),
-                            Text("Selected"),
-                            SizedBox(width: 30),
-                            Container(
-                              height: 10,
-                              width: 10,
-                              color: Colors.grey,
-                            ),
-                            Text("Available"),
-                          ],
-                        )
-                      ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // FutureBuilder(
+                    //   future: _transaction,
+                    //   builder: (BuildContext context,
+                    //       AsyncSnapshot<UpiResponse> snapshot) {
+                    //     if (snapshot.connectionState == ConnectionState.done) {
+                    //       if (snapshot.hasError) {
+                    //         print(
+                    //             "An Unknown error has occured##############################################################");
+                    //         return Center(
+                    //             child: Text('An Unknown error has occured'));
+                    //       }
+                    //       UpiResponse _upiResponse;
+                    //       _upiResponse = snapshot.data;
+                    //       // if (_upiResponse.runtimeType != null) {
+                    //       //   String text = '';
+                    //       //   switch (snapshot.error.runtimeType) {
+                    //       //     case UpiIndiaAppNotInstalledException:
+                    //       //       print(
+                    //       //           "Requested app not installed on device##############################################################");
+                    //       //       text = "no UPI app found";
+
+                    //       //       break;
+                    //       //     case UpiIndiaInvalidParametersException:
+                    //       //       print(
+                    //       //           "Requested app cannot handle the transaction##############################################################");
+                    //       //       text = "due to failed Payment";
+                    //       //       break;
+                    //       //     case UpiIndiaNullResponseException:
+                    //       //       print(
+                    //       //           "requested app didn't returned any response##############################################################");
+                    //       //       text = "due to failed Payment";
+                    //       //       break;
+                    //       //     case UpiIndiaUserCancelledException:
+                    //       //       print(
+                    //       //           "You cancelled the transaction##############################################################");
+                    //       //       text = "by you";
+                    //       //       break;
+                    //       //   }
+                    //       //   return Center(
+                    //       //     child: Text(text),
+                    //       //     // showUPIErrorDialog(context, text, docID),
+                    //       //   );
+                    //       // }
+                    //       String txnId = _upiResponse.transactionId;
+                    //       String resCode = _upiResponse.responseCode;
+                    //       String txnRef = _upiResponse.transactionRefId;
+                    //       String status = _upiResponse.status;
+                    //       String approvalRef = _upiResponse.approvalRefNo;
+                    //       switch (status) {
+                    //         case UpiPaymentStatus.SUCCESS:
+                    //           print(
+                    //               'Transaction Successful##############################################################');
+                    //           print(docID);
+                    //           _updatePayments(
+                    //               txnId,
+                    //               status,
+                    //               selectedSlotsCount * 50.00.toInt(),
+                    //               widget.user,
+                    //               "ACC",
+                    //               docID,
+                    //               "Transaction Successful");
+
+                    //           break;
+                    //         case UpiPaymentStatus.SUBMITTED:
+                    //           print(
+                    //               'Transaction Pending##############################################################');
+                    //           _updatePayments(
+                    //               txnId,
+                    //               status,
+                    //               selectedSlotsCount * 50.00.toInt(),
+                    //               widget.user,
+                    //               "ACC",
+                    //               docID,
+                    //               "Transaction Pending");
+
+                    //           break;
+                    //         case UpiPaymentStatus.FAILURE:
+                    //           print(
+                    //               'Transaction Failed##############################################################');
+                    //           _updatePayments(
+                    //               txnId,
+                    //               status,
+                    //               selectedSlotsCount * 50.00.toInt(),
+                    //               widget.user,
+                    //               "ACC",
+                    //               docID,
+                    //               "Transaction Failed");
+
+                    //           break;
+                    //         default:
+                    //           _updatePayments(
+                    //               txnId,
+                    //               status,
+                    //               selectedSlotsCount * 50.00.toInt(),
+                    //               widget.user,
+                    //               "ACC",
+                    //               docID,
+                    //               "Transaction Failed");
+
+                    //           print(
+                    //               'Received an Unknown transaction status##############################################################');
+                    //       }
+                    //       return Text("data");
+                    //     } else
+                    //       return Text(' ');
+                    //   },
+                    // ),
+                    Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 10,
+                                width: 10,
+                                color: Colors.red,
+                              ),
+                              Text("Booked"),
+                              SizedBox(width: 30),
+                              Container(
+                                height: 10,
+                                width: 10,
+                                color: Colors.green,
+                              ),
+                              Text("Selected"),
+                              SizedBox(width: 30),
+                              Container(
+                                height: 10,
+                                width: 10,
+                                color: Colors.grey,
+                              ),
+                              Text("Available"),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 30),
-                  Container(
-                    child: _buildBody(),
-                  ),
-                  SizedBox(height: 30),
-                  Container(
-                      width: 250,
-                      height: 150,
-                      child: DropdownButtonFormField<String>(
-                        // value: "Single",
-                        style: TextStyle(color: Theme.of(context).primaryColor),
-                        items: _getDropDownListItem(_playingMode),
-                        onChanged: (String newSelectedValue) {
-                          setState(() {
-                            _selectedPlayingMode = newSelectedValue;
-                          });
-                        },
-                        hint: new Text("SELECT MODE   (dafault : Single)"),
-                      )),
-                  FutureBuilder(
-                    future: _transaction,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<UpiResponse> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        if (snapshot.hasError) {
-                          print("An Unknown error has occured");
-                          return Center(child: Text(''));
-                        }
-                        UpiResponse _upiResponse;
-                        _upiResponse = snapshot.data;
-                        if (_upiResponse.error != null) {
-                          String text = '';
-                          switch (snapshot.data.error) {
-                            case UpiError.APP_NOT_INSTALLED:
-                              print("Requested app not installed on device");
-                              text = "no UPI app found";
-
-                              break;
-                            case UpiError.INVALID_PARAMETERS:
-                              print(
-                                  "Requested app cannot handle the transaction");
-                              text = "due to failed Payment";
-                              break;
-                            case UpiError.NULL_RESPONSE:
-                              print(
-                                  "requested app didn't returned any response");
-                              text = "due to failed Payment";
-                              break;
-                            case UpiError.USER_CANCELLED:
-                              print("You cancelled the transaction");
-                              text = "by you";
-                              break;
-                          }
-                          return Center(
-                            child: showUPIErrorDialog(context, text, docID),
-                          );
-                        }
-                        String txnId = _upiResponse.transactionId;
-                        String resCode = _upiResponse.responseCode;
-                        String txnRef = _upiResponse.transactionRefId;
-                        String status = _upiResponse.status;
-                        String approvalRef = _upiResponse.approvalRefNo;
-                        switch (status) {
-                          case UpiPaymentStatus.SUCCESS:
-                            print('Transaction Successful');
-                            print(docID);
-                            _updatePayments(
-                                txnId,
-                                status,
-                                selectedSlotsCount * 50.00.toInt(),
-                                widget.user,
-                                "ACC",
-                                docID,
-                                "Transaction Successful");
-
-                            break;
-                          case UpiPaymentStatus.SUBMITTED:
-                            print('Transaction Pending');
-                            _updatePayments(
-                                txnId,
-                                status,
-                                selectedSlotsCount * 50.00.toInt(),
-                                widget.user,
-                                "ACC",
-                                docID,
-                                "Transaction Pending");
-
-                            break;
-                          case UpiPaymentStatus.FAILURE:
-                            print('Transaction Failed');
-                            _updatePayments(
-                                txnId,
-                                status,
-                                selectedSlotsCount * 50.00.toInt(),
-                                widget.user,
-                                "ACC",
-                                docID,
-                                "Transaction Failed");
-
-                            break;
-                          default:
-                            _updatePayments(
-                                txnId,
-                                status,
-                                selectedSlotsCount * 50.00.toInt(),
-                                widget.user,
-                                "ACC",
-                                docID,
-                                "Transaction Failed");
-
-                            print('Received an Unknown transaction status');
-                        }
-                        return Text("data");
-                      } else
-                        return Text(' ');
-                    },
-                  ),
-                ],
+                    SizedBox(height: 30),
+                    Container(
+                      child: _buildBody(),
+                    ),
+                    SizedBox(height: 30),
+                    Container(
+                        width: 250,
+                        height: 150,
+                        child: DropdownButtonFormField<String>(
+                          // value: "Single",
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                          items: _getDropDownListItem(_playingMode),
+                          onChanged: (String newSelectedValue) {
+                            setState(() {
+                              _selectedPlayingMode = newSelectedValue;
+                            });
+                          },
+                          hint: new Text("SELECT MODE   (dafault : Single)"),
+                        )),
+                  ],
+                ),
               )),
         ],
       ),
@@ -416,32 +430,35 @@ class _SlotBookingState extends State<SlotBooking> {
                     //      });
 
                     progressDialog.hide().then((isHidden) {
-                      //Fluttertoast.showToast(msg: "Hi!: Booking Successful ");
-                      _paymentGateway(idDOC);
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             // PaymentGateway(
-                      //             //       userName: widget.user,
-                      //             //       phone: widget.phone,
-                      //             //       userID: widget.userID,
-                      //             //       amount: 1,
-                      //             //       documentID: idDOC,
-                      //             //       user: widget.user,
-                      //             //       userRole: widget.userRole,
-                      //             //       orderID: orderID,
-                      //             //     )
-
-                      //             //   MyBookings(
-                      //             //   user: widget.user,
-                      //             //   phone: widget.phone,
-                      //             //   userID: widget.userID,
-                      //             //   userRole: widget.userRole,
-                      //             // )
-                      //             // PaymentGateway()
-                      //             ));
+                      if (isHidden) {
+                        _paymentGateway(idDOC);
+                      }
                     });
+                    //Fluttertoast.showToast(msg: "Hi!: Booking Successful ");
+
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) =>
+                    //             // PaymentGateway(
+                    //             //       userName: widget.user,
+                    //             //       phone: widget.phone,
+                    //             //       userID: widget.userID,
+                    //             //       amount: 1,
+                    //             //       documentID: idDOC,
+                    //             //       user: widget.user,
+                    //             //       userRole: widget.userRole,
+                    //             //       orderID: orderID,
+                    //             //     )
+
+                    //             //   MyBookings(
+                    //             //   user: widget.user,
+                    //             //   phone: widget.phone,
+                    //             //   userID: widget.userID,
+                    //             //   userRole: widget.userRole,
+                    //             // )
+                    //             // PaymentGateway()
+                    //             ));
 
                     selectedSlots.clear();
                   });
@@ -497,6 +514,21 @@ class _SlotBookingState extends State<SlotBooking> {
   //     return null;
   //   }
   // }
+
+  String _upiErrorHandler(error) {
+    switch (error) {
+      case UpiIndiaAppNotInstalledException:
+        return 'Requested app not installed on device';
+      case UpiIndiaUserCancelledException:
+        return 'You cancelled the transaction';
+      case UpiIndiaNullResponseException:
+        return 'Requested app didn\'t return any response';
+      case UpiIndiaInvalidParametersException:
+        return 'Requested app cannot handle the transaction';
+      default:
+        return 'An Unknown error has occurred';
+    }
+  }
 
   Future<String> bookSlot(String timeSlot) async {
     String id = new DateTime.now().millisecondsSinceEpoch.toString();
@@ -1761,12 +1793,37 @@ class _SlotBookingState extends State<SlotBooking> {
                         SizedBox(
                           height: 25,
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Container(
+                            color: Colors.redAccent[300],
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SelectableText("Phone No : 8850558137",
+                                        style: TextStyle(color: Colors.black))
+                                  ],
+                                ),
+                                SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SelectableText("UPI ID : 8850558137@ybl",
+                                        style: TextStyle(color: Colors.black))
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
                         Container(
                           width: MediaQuery.of(context).size.width,
                           child: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text(
-                              'Please select a payment app to complete the booking',
+                              'Please click OK to complete the booking',
                               style: TextStyle(
                                   //  fontWeight: FontWeight.bold,
                                   fontSize: 15,
@@ -1775,7 +1832,29 @@ class _SlotBookingState extends State<SlotBooking> {
                             ),
                           ),
                         ),
-                        displayUpiApps(),
+                        Container(
+                          child: Center(
+                            child: FlatButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                progressDialog.show().then((value) {
+                                  if (value) {
+                                    _updatePayments(
+                                        "",
+                                        'payment pending',
+                                        selectedSlotsCount * 50.00.toInt(),
+                                        widget.user,
+                                        "ACC",
+                                        docID,
+                                        "Transaction Successful");
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+
+                        //  displayUpiApps(),
                       ],
                     ),
                   );
@@ -1789,7 +1868,7 @@ class _SlotBookingState extends State<SlotBooking> {
   _updatePayments(String txnId, String status, int amount, String from,
       String to, String docID, String reason) {
     print(status);
-    if (status.contains("success")) {
+    if (status.contains("success") || status.contains("payment pending")) {
       Fluttertoast.showToast(msg: "TRANSACTION SUCCESSFULL");
 
       final databaseReference = Firestore.instance;
@@ -1814,17 +1893,21 @@ class _SlotBookingState extends State<SlotBooking> {
               .document("o8IeiiVaNNE1dGG9kNxJ")
               .setData({'total': totalbalanceDoc['total'] + amount},
                   merge: true);
+          progressDialog.hide().then((value) {
+            if (value) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MyBookings(
+                            user: widget.user,
+                            phone: widget.phone,
+                            userID: widget.userID,
+                            userRole: widget.userRole,
+                            showNew: "true",
+                          )));
+            }
+          });
 
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => MyBookings(
-                        user: widget.user,
-                        phone: widget.phone,
-                        userID: widget.userID,
-                        userRole: widget.userRole,
-                        showNew: "true",
-                      )));
           Fluttertoast.showToast(msg: "BOOKING CONFIRMED");
         });
       });

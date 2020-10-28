@@ -59,6 +59,31 @@ class _AddNoticeState extends State<AddNotice> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    titleController.clear();
+    title1Controller.clear();
+    title2Controller.clear();
+    title3Controller.clear();
+    title4Controller.clear();
+    title5Controller.clear();
+    title6Controller.clear();
+    title7Controller.clear();
+    title8Controller.clear();
+
+    descriptionController.clear();
+    description1Controller.clear();
+    descriptio2Controller.clear();
+    description3Controller.clear();
+    description4Controller.clear();
+    descriptio5Controller.clear();
+    description6Controller.clear();
+    description7Controller.clear();
+    descriptio8Controller.clear();
+
+    super.dispose();
+  }
+
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   ProgressDialog progressDialog;
   @override
@@ -273,6 +298,12 @@ class _AddNoticeState extends State<AddNotice> {
                   'title8': title8Controller.text,
                   'description8': descriptio8Controller.text,
                 }).then((value) {
+                  Firestore.instance
+                      .collection("NoticeBoard")
+                      .document(value.documentID)
+                      .updateData({
+                    "NoticeDocId": value.documentID.toString(),
+                  });
                   progressDialog.hide().then((value) {
                     if (value) {
                       Fluttertoast.showToast(msg: "Notice Posted!");

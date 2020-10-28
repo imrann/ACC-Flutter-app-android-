@@ -12,7 +12,7 @@ class FancyLoader extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300],
       period: Duration(milliseconds: 500),
-      highlightColor: Theme.of(context).primaryColorLight,
+      highlightColor: Colors.white,
       child: getLoaderType(loaderType: loaderType, lines: lines),
     );
   }

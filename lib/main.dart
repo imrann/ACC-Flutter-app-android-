@@ -4,7 +4,6 @@ import 'package:aayush_carrom_club/Screens/Maintainance.dart';
 import 'package:aayush_carrom_club/Screens/Splash.dart';
 import 'package:aayush_carrom_club/Screens/StateManager.dart';
 import 'package:aayush_carrom_club/SharedPref/UserDetailsSP.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

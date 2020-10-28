@@ -110,6 +110,8 @@ class _DrawerNavState extends State<DrawerNav> {
         ),
         DrawerTiles(icon: Icon(Icons.play_arrow), title: 'ACC Youtube Channel'),
         Divider(thickness: 0.5, endIndent: 5, color: Colors.grey),
+        DrawerTiles(icon: Icon(Icons.payment), title: 'Payent Details'),
+        Divider(thickness: 0.5, endIndent: 5, color: Colors.grey),
         DrawerTiles(icon: Icon(Icons.people_outline), title: 'About Us'),
         Divider(thickness: 0.5, endIndent: 5, color: Colors.grey),
         DrawerTiles(icon: Icon(Icons.exit_to_app), title: 'Logout'),

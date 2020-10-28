@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1063835444188-li2v3lhfkapo2appduq7q46p5l8ukv76.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aakash_thori.aayush_carrom_club",
+            "certificate_hash": "8e4a65970ac6b93f6a6f8bd123a0ff2c2360f9db"
+          }
+        },
+        {
           "client_id": "1063835444188-qtaea0gaih7s6fo9qg5hk724r5klq1dq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

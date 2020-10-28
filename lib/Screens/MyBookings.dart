@@ -1,18 +1,15 @@
 import 'dart:io';
 
 import 'package:aayush_carrom_club/Screens/AppBarCommon.dart';
-import 'package:aayush_carrom_club/Screens/DrawerTiles.dart';
 import 'package:aayush_carrom_club/Screens/ErrorPage.dart';
 import 'package:aayush_carrom_club/Screens/FancyLoader.dart';
 import 'package:aayush_carrom_club/Screens/Home.dart';
 import 'package:aayush_carrom_club/Screens/Shop.dart';
 import 'package:aayush_carrom_club/Screens/StateManager.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -227,12 +224,14 @@ class _MyBookingsState extends State<MyBookings> {
                 Icons.home,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title: Text('Home', style: TextStyle(color: Colors.white))),
           BottomNavigationBarItem(
               icon: Icon(
                 Icons.confirmation_number,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title:
                   Text('My Bookings', style: TextStyle(color: Colors.white))),
           BottomNavigationBarItem(
@@ -240,6 +239,7 @@ class _MyBookingsState extends State<MyBookings> {
                 Icons.compare_arrows,
                 color: Colors.white,
               ),
+              // ignore: deprecated_member_use
               title:
                   Text('Transactions', style: TextStyle(color: Colors.white))),
         ],
@@ -680,7 +680,7 @@ class _MyBookingsState extends State<MyBookings> {
       String role, String status, String bookedUserID) {
     // set up the buttons
     Widget markPlayedButton = FlatButton(
-      child: Text("Very & Mark played"),
+      child: Text("Verify & Mark played"),
       onPressed: () {
         if (_codeController.text == confirmationCode) {
           _updatePlayedOrCancle("played", id);
@@ -695,6 +695,7 @@ class _MyBookingsState extends State<MyBookings> {
     Widget markCancelButton = FlatButton(
       child: Text("Mark Cancle"),
       onPressed: () {
+        print("Mark Cancle");
         _updatePlayedOrCancle("cancle", id);
       },
     );
@@ -702,6 +703,8 @@ class _MyBookingsState extends State<MyBookings> {
     Widget markPlayedAdminButton = FlatButton(
       child: Text("Mark Played"),
       onPressed: () {
+        print("Mark Played");
+
         _updatePlayedOrCancle("played", id);
       },
     );
@@ -735,7 +738,13 @@ class _MyBookingsState extends State<MyBookings> {
                     ],
                   )
                 : (status == 'booked' && role == 'Admin')
-                    ? markPlayedButton
+                    ? Column(
+                        children: [
+                          Row(
+                            children: [markPlayedButton, markCancelButton],
+                          )
+                        ],
+                      )
                     : (status == 'booked' && role != 'Admin')
                         ? okButton
                         : okButton
@@ -752,31 +761,29 @@ class _MyBookingsState extends State<MyBookings> {
 
   _updatePlayedOrCancle(String action, String id) async {
     Navigator.of(context).pop();
-    progressDialog.show().then((value) {
-      if (value) {
+    print("after");
+    progressDialog.show().then((isShown) {
+      print("before");
+      print(isShown.toString());
+      if (isShown) {
+        print("inside");
         if (action == "played") {
           final dbRef = Firestore.instance
               .collection("Bookings")
               .document(id)
               .updateData({"status": "played"}).then((value) {
-            progressDialog.hide().then((value) {
-              if (value) {
-                scaffoldKey.currentState.showSnackBar(SnackBar(
-                  content: Text(
-                    "Status Marked Played",
-                    textAlign: TextAlign.center,
-                  ),
-                  duration: Duration(seconds: 2),
-                ));
-              }
-            }).catchError((err) {
-              scaffoldKey.currentState.showSnackBar(SnackBar(
-                content: Text(
-                  "Something wnt wrong!! try again.",
-                  textAlign: TextAlign.center,
-                ),
-                duration: Duration(seconds: 2),
-              ));
+            final databaseReference = Firestore.instance;
+            databaseReference
+                .collection("Payments")
+                .where("bookingsDocID", isEqualTo: id)
+                .getDocuments()
+                .then((value) {
+              value.documents.forEach((result) {
+                databaseReference
+                    .collection("Payments")
+                    .document(result.documentID)
+                    .updateData({"transactionStatus": "success"});
+              });
             });
           });
         } else if (action == "cancle") {
@@ -785,28 +792,46 @@ class _MyBookingsState extends State<MyBookings> {
               .document(id)
               .setData({"status": "cancelled", 'reasonForCancle': 'by Admin'},
                   merge: true).then((value) {
-            progressDialog.hide().then((value) {
-              if (value) {
-                scaffoldKey.currentState.showSnackBar(SnackBar(
-                  content: Text(
-                    "Status Marked Cancelled",
-                    textAlign: TextAlign.center,
-                  ),
-                  duration: Duration(seconds: 2),
-                ));
-              }
-            }).catchError((err) {
-              scaffoldKey.currentState.showSnackBar(SnackBar(
-                content: Text(
-                  "Something wnt wrong!! try again.",
-                  textAlign: TextAlign.center,
-                ),
-                duration: Duration(seconds: 2),
-              ));
+            final databaseReference = Firestore.instance;
+            databaseReference
+                .collection("Payments")
+                .where("bookingsDocID", isEqualTo: id)
+                .getDocuments()
+                .then((value) {
+              value.documents.forEach((result) {
+                databaseReference
+                    .collection("Payments")
+                    .document(result.documentID)
+                    .updateData({"transactionStatus": "failure"});
+
+                databaseReference
+                    .collection("TotalBalance")
+                    .document("o8IeiiVaNNE1dGG9kNxJ")
+                    .get()
+                    .then((totalbalanceDoc) {
+                  print(totalbalanceDoc['total']);
+                  databaseReference
+                      .collection("TotalBalance")
+                      .document("o8IeiiVaNNE1dGG9kNxJ")
+                      .setData({
+                    'total': totalbalanceDoc['total'] - result.data['amount']
+                  }, merge: true);
+                });
+              });
             });
-            ;
           });
         }
+        progressDialog.hide().then((isHidden) {
+          if (isHidden) {
+            scaffoldKey.currentState.showSnackBar(SnackBar(
+              content: Text(
+                "Status Marked!!",
+                textAlign: TextAlign.center,
+              ),
+              duration: Duration(seconds: 2),
+            ));
+          }
+        });
       }
     });
   }

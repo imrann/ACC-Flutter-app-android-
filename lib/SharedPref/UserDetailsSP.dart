@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,8 +9,25 @@ class UserDetailsSP {
     preferences.setString("uPhoneNumber", userDetails.phoneNumber);
     preferences.setString("uName", uName);
     preferences.setBool("uLoggedIn", true);
+    preferences.setString("deviceToken", "empty");
 
     return true;
+  }
+
+  Future<String> getDeviceToken() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    String token = preferences.getString("deviceToken");
+
+    return token;
+  }
+
+  Future<String> setDeviceToken(String token) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    preferences.setString("deviceToken", token);
+
+    return token;
   }
 
   Future<dynamic> logOutUser() async {
