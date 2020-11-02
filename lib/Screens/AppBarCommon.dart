@@ -160,9 +160,9 @@ class _AppBarCommonState extends State<AppBarCommon> {
                           List<DocumentSnapshot> data = value.documents;
 
                           data.removeWhere((element) =>
-                              !element['transactionStatus']
-                                  .toString()
-                                  .contains("success"));
+                              !element['transactionStatus'].toString().contains(
+                                  new RegExp(
+                                      r'\b(?:success|payment pending)\b')));
                           var totalBalance = 0;
                           for (int i = 0; i < data.length; i++) {
                             totalBalance =
