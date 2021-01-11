@@ -18,6 +18,7 @@ Admin can make Anouncement on Home page which will be notified to all users via 
 ## Future Implementations:
 
   Adding razorPay payment gaeway.
+
   Admin role by choice.
 
-##ScreenShots
+## ScreenShots:
