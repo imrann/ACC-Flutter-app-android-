@@ -22,3 +22,15 @@ Admin can make Anouncement on Home page which will be notified to all users via 
   Admin role by choice.
 
 ## ScreenShots:
+
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11%20(1).jpeg)
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11%20(2).jpeg)
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11%20(3).jpeg)
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11%20(4).jpeg)
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11%20(5).jpeg)
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11%20(6).jpeg)
+![alt text](https://github.com/imrann/SS/blob/main/WhatsApp%20Image%202020-10-19%20at%2018.48.11.jpeg
+)
+
+
+
